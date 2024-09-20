@@ -50,7 +50,7 @@ To consolidate the knowledge acquired this week, students should complete the fo
 - [ ] Display the answer on the page, indicating whether the animal in the picture is dangerous
 - [ ] Submit your project in the submission form
 
-The exercise statement is in the [Weekend Project](https://github.com/Encode-Club-AI-Bootcamp/Generative-AI-Applications/tree/main/Lesson-08#weekend-project) section, at the end of **Lesson 20**.
+Note: The exercise statement is in the [Weekend Project](https://github.com/Encode-Club-AI-Bootcamp/Generative-AI-Applications/tree/main/Lesson-08#weekend-project) section, at the end of **Lesson 20**.
 
 <hr>
 
