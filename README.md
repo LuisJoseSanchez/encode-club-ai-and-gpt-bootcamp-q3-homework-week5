@@ -7,7 +7,13 @@
 In this repo you will find the code and documentation of the **homework for week 5** of the 
 **Encode Club AI and GPT Bootcamp Q3 2024**.
 
-The main goal of this assignment is 
+The main goal of this assignment is **to use a Computer Vision model to detect and classify an animal whose picture has been uploaded by the user**.
+
+
+
+
+
+## Participants
 
 This homework has been done by the following members of **GROUP 9**:
 
