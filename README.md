@@ -9,9 +9,7 @@ In this repo you will find the code and documentation of the **homework for week
 
 The main goal of this assignment is **to use a Computer Vision model to detect and classify an animal whose picture has been uploaded by the user**.
 
-
-
-
+<img src="images/animal-detection800.png" height="600">
 
 ## Participants
 
