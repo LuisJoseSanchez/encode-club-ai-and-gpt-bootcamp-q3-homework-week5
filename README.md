@@ -23,7 +23,7 @@ This homework has been done by the following members of **GROUP 9**:
 * [Ahmed Yassin](https://github.com/AYassin01)
 * [Maria Kachalova](https://github.com/MaryFox)
 
-[Project]() with tasks and assignments.
+[Project](https://github.com/users/LuisJoseSanchez/projects/2) with tasks and assignments.
 
 ## Installation
 
