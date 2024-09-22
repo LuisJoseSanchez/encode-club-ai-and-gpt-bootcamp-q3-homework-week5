@@ -6,6 +6,29 @@ import { Upload, Camera, AlertTriangle } from "lucide-react";
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      setSelectedFile(event.target.files[0]); // Save the selected file in the state
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append("file", selectedFile);
+
+    // TODO
+    
+    await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    console.log("File uploaded");
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 p-8 font-[family-name:var(--font-geist-sans)]">
