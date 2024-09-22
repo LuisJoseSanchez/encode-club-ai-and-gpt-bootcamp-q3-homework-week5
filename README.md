@@ -36,10 +36,10 @@ To consolidate the knowledge acquired this week, students should complete the fo
 - [x] Create a GitHub repository for your project
 - [x] Add all members of your group as collaborators
 - [x] Create a README.md file with the description of your project
-- [ ] Create a new application from scratch using NextJS
-- [ ] Create a page with a single input field for the user to upload an image
+- [x] Create a new application from scratch using NextJS
+- [x] Create a page with a single input field for the user to upload an image
     - Ideally, the user would upload a picture of an animal 
-- [ ] Add a button to upload the image
+- [x] Add a button to upload the image
 - [ ] Use a Computer Vision model to detect and classify the animal
      - The model should be able to detect at least 10 different animals of your choice
      - The model should return the name of the animal detected (classification)
