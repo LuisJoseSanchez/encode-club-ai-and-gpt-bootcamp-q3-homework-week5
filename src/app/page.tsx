@@ -7,11 +7,13 @@ import { Upload, Camera, AlertTriangle } from "lucide-react";
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [result, setResult] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]); // Save the selected file in the state
+      setSelectedFile(event.target.files[0]);
+      setResult(null);
     }
   };
 
@@ -21,14 +23,14 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", selectedFile);
 
-    // TODO
-    
-    await fetch("/api/upload", {
+    const response = await fetch("/api/classify", {
       method: "POST",
       body: formData,
     });
 
-    console.log("File uploaded");
+    const data = await response.json();
+    console.log(data);
+    setResult(data.result);
   };
 
   return (
@@ -103,10 +105,15 @@ export default function Home() {
         )}
 
         <div className="text-center">
-          <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto">
-            <Camera className="h-5 w-5" />
-            <span>Take a Photo</span>
-          </button>
+        <button
+          className={`bg-green-500 text-white py-3 px-6 rounded-full ${
+            !selectedFile ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+          onClick={handleSubmit}
+          disabled={!selectedFile}
+        >
+          <span>Continue</span>
+        </button>
         </div>
       </main>
       <footer className="mt-12 text-center text-gray-600">
