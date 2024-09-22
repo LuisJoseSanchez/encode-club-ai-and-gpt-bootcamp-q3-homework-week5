@@ -1,47 +1,69 @@
+"use client";
+
+import { useState } from "react"; // Здесь только одно определение useState
 import Image from "next/image";
+import { Upload, Camera, AlertTriangle } from "lucide-react";
 
 export default function Home() {
-  return (
-    <div className="grid items-center justify-items-center min-h-screen sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-center">
-        <h1 className="text-xl font-bold text-slate-600">
-          Animal detection
-        </h1>
-        <Image
-          className="rounded-3xl"
-          src="/animal-detection800.png"
-          alt="Animal detection picture"
-          width={400}
-          height={400}
-          priority
-        />
-        <p>
-          Upload an image of an animal and this aplication will detect and
-          classify it in between these catagories: chamaleon, owl, tiger, zebra, bear, squirrel, rabbit, fox, canary and wolf.
-        </p>
-        <p>
-          This app will give you a description of the animal and will tell you if it is dangerous.
-        </p>
+  const [isDragging, setIsDragging] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href=""
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Upload image
-          </a>
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 p-8 font-[family-name:var(--font-geist-sans)]">
+      <main className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl p-8 space-y-8">
+        <h1 className="text-4xl font-bold text-center text-purple-600 animate-bounce">
+          🦁 Animal Detective 🐘
+        </h1>
+        <div className="relative">
+          <Image
+            className="rounded-2xl shadow-md hover:shadow-xl transition-shadow duration-300"
+            src="/animal-detection800.png"
+            alt="Animal detection picture"
+            width={800}
+            height={400}
+            priority
+          />
+          <div className="absolute top-4 right-4 bg-yellow-400 text-black font-bold py-2 px-4 rounded-full transform rotate-12 animate-pulse">
+            New!
+          </div>
+        </div>
+        <p className="text-lg text-center text-gray-700">
+          Upload an image of an animal, and our AI will detect and classify it into one of these categories:
+        </p>
+        <div className="flex flex-wrap justify-center gap-4">
+          {["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"].map((animal) => (
+            <span key={animal} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+              {animal}
+            </span>
+          ))}
+        </div>
+        <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-lg flex items-center space-x-3">
+          <AlertTriangle className="h-6 w-6 flex-shrink-0" />
+          <p>This app will give you a description of the animal and tell you if it's dangerous!</p>
+        </div>
+        <div 
+          className={`border-4 border-dashed rounded-2xl p-8 text-center transition-colors duration-300 ${
+            isDragging ? "border-green-500 bg-green-100" : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+          }`}
+          onDragEnter={() => setIsDragging(true)}
+          onDragLeave={() => setIsDragging(false)}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={() => setIsDragging(false)}
+        >
+          <p className="text-xl mb-4">Drag and drop your animal image here</p>
+          <p className="text-gray-500 mb-4">or</p>
+          <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto">
+            <Upload className="h-5 w-5" />
+            <span>Upload Image</span>
+          </button>
+        </div>
+        <div className="text-center">
+          <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto">
+            <Camera className="h-5 w-5" />
+            <span>Take a Photo</span>
+          </button>
         </div>
       </main>
-      <footer className="pt-10 row-start-3 gap-8 flex-wrap items-center justify-center">
+      <footer className="mt-12 text-center text-gray-600">
         <p>AI and GPT Bootcamp Q3 2024</p>
         <p>Homework for week 5 - Group 9</p>
       </footer>
