@@ -1,37 +1,57 @@
 "use client";
 
-import { useRef, useState } from "react"; // Здесь только одно определение useState
+import { useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { Upload, Camera, AlertTriangle } from "lucide-react";
+
+const animalCategories = ["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"];
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setSelectedFile(event.target.files[0]);
-      setResult(null);
-    }
-  };
+  const handleFileSelection = useCallback((file: File) => {
+    setSelectedFile(file);
+    setResult(null);
+    setPreviewUrl(URL.createObjectURL(file));
+  }, []);
 
-  const handleSubmit = async () => {
+  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files.length > 0) {
+      handleFileSelection(event.target.files[0]);
+    }
+  }, [handleFileSelection]);
+
+  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragging(false);
+    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+      handleFileSelection(event.dataTransfer.files[0]);
+    }
+  }, [handleFileSelection]);
+
+  const handleSubmit = useCallback(async () => {
     if (!selectedFile) return;
 
     const formData = new FormData();
     formData.append("file", selectedFile);
 
-    const response = await fetch("/api/classify", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const response = await fetch("/api/classify", {
+        method: "POST",
+        body: formData,
+      });
 
-    const data = await response.json();
-    console.log(data);
-    setResult(data.result);
-  };
+      const data = await response.json();
+      console.log(data);
+      setResult(data.result);
+    } catch (error) {
+      console.error("Error submitting image:", error);
+    }
+  }, [selectedFile]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 p-8 font-[family-name:var(--font-geist-sans)]">
@@ -56,7 +76,7 @@ export default function Home() {
           Upload an image of an animal, and our AI will detect and classify it into one of these categories:
         </p>
         <div className="flex flex-wrap justify-center gap-4">
-          {["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"].map((animal) => (
+          {animalCategories.map((animal) => (
             <span key={animal} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
               {animal}
             </span>
@@ -83,10 +103,24 @@ export default function Home() {
           onDragEnter={() => setIsDragging(true)}
           onDragLeave={() => setIsDragging(false)}
           onDragOver={(e) => e.preventDefault()}
-          onDrop={() => setIsDragging(false)}
+          onDrop={handleDrop}
         >
-          <p className="text-xl mb-4">Drag and drop your animal image here</p>
-          <p className="text-gray-500 mb-4">or</p>
+          {previewUrl ? (
+            <div className="mb-4">
+              <Image
+                src={previewUrl}
+                alt="Uploaded animal"
+                width={200}
+                height={200}
+                className="mx-auto rounded-lg object-cover"
+              />
+            </div>
+          ) : (
+            <>
+              <p className="text-xl mb-4">Drag and drop your animal image here</p>
+              <p className="text-gray-500 mb-4">or</p>
+            </>
+          )}
 
           {/* Button to select image */}
           <button
@@ -97,12 +131,6 @@ export default function Home() {
           <span>Upload Image</span>
           </button>
         </div>
-
-        {selectedFile && (
-          <p className="text-center text-sm text-gray-700">
-            Selected file: {selectedFile.name}
-          </p>
-        )}
 
         <div className="text-center">
         <button
