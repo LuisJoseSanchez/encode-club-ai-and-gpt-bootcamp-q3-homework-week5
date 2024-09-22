@@ -40,7 +40,7 @@ To consolidate the knowledge acquired this week, students should complete the fo
 - [x] Create a page with a single input field for the user to upload an image
     - Ideally, the user would upload a picture of an animal 
 - [x] Add a button to upload the image
-- [ ] Use a Computer Vision model to detect and classify the animal
+- [x] Use a Computer Vision model to detect and classify the animal
      - The model should be able to detect at least 10 different animals of your choice
      - The model should return the name of the animal detected (classification)
 - [ ] Create an AI Agent that can find a page in [Wikipedia](https://wikipedia.org/) with the name of the animal, retrieve the description, and determine if the animal is dangerous
