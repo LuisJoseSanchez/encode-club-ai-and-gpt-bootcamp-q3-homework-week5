@@ -17,7 +17,7 @@ export default function Home() {
         />
         <p>
           Upload an image of an animal and this aplication will detect and
-          classify it in between this catagories: chamaleon, owl, tiger, zebra, bear, squirrel, rabbit, fox, canary and wolf.
+          classify it in between these catagories: chamaleon, owl, tiger, zebra, bear, squirrel, rabbit, fox, canary and wolf.
         </p>
         <p>
           This app will give you a description of the animal and will tell you if it is dangerous.
