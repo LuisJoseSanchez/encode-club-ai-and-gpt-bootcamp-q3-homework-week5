@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react"; // Здесь только одно определение useState
+import { useRef, useState } from "react"; // Здесь только одно определение useState
 import Image from "next/image";
 import { Upload, Camera, AlertTriangle } from "lucide-react";
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
@@ -63,6 +64,16 @@ export default function Home() {
           <AlertTriangle className="h-6 w-6 flex-shrink-0" />
           <p>This app will give you a description of the animal and tell you if it's dangerous!</p>
         </div>
+
+        {/* Hidden input */}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileUpload}
+          ref={fileInputRef}
+          style={{ display: "none" }}
+        />
+
         <div 
           className={`border-4 border-dashed rounded-2xl p-8 text-center transition-colors duration-300 ${
             isDragging ? "border-green-500 bg-green-100" : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
@@ -74,11 +85,23 @@ export default function Home() {
         >
           <p className="text-xl mb-4">Drag and drop your animal image here</p>
           <p className="text-gray-500 mb-4">or</p>
-          <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto">
-            <Upload className="h-5 w-5" />
-            <span>Upload Image</span>
+
+          {/* Button to select image */}
+          <button
+            className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto"
+            onClick={() => fileInputRef.current?.click()} // Simulate the click on the input
+          >
+          <Upload className="h-5 w-5" />
+          <span>Upload Image</span>
           </button>
         </div>
+
+        {selectedFile && (
+          <p className="text-center text-sm text-gray-700">
+            Selected file: {selectedFile.name}
+          </p>
+        )}
+
         <div className="text-center">
           <button className="bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto">
             <Camera className="h-5 w-5" />
