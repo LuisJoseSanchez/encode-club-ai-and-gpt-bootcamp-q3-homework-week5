@@ -1,21 +1,25 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { Upload, Camera, AlertTriangle } from "lucide-react";
+import { Upload, AlertTriangle } from "lucide-react";
 
 const animalCategories = ["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"];
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
 
   const handleFileSelection = useCallback((file: File) => {
     setSelectedFile(file);
     setResult(null);
+    setError(null);
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
 
@@ -36,6 +40,8 @@ export default function Home() {
   const handleSubmit = useCallback(async () => {
     if (!selectedFile) return;
 
+    setIsLoading(true);
+    setError(null);
     const formData = new FormData();
     formData.append("file", selectedFile);
 
@@ -45,13 +51,41 @@ export default function Home() {
         body: formData,
       });
 
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      console.log(data);
+      console.log("API response:", data);
       setResult(data.result);
     } catch (error) {
       console.error("Error submitting image:", error);
+      setError(error instanceof Error ? error.message : String(error));
+      setResult(null);
+    } finally {
+      setIsLoading(false);
     }
   }, [selectedFile]);
+
+  useEffect(() => {
+    console.log("Result updated:", result);
+    if (result && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [result]);
+
+  useEffect(() => {
+    const originalError = console.error;
+    console.error = (...args) => {
+      if (typeof args[0] === 'string' && args[0].includes('Extra attributes from the server')) {
+        return;
+      }
+      originalError.call(console, ...args);
+    };
+    return () => {
+      console.error = originalError;
+    };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-100 to-green-100 p-8 font-[family-name:var(--font-geist-sans)]">
@@ -106,13 +140,13 @@ export default function Home() {
           onDrop={handleDrop}
         >
           {previewUrl ? (
-            <div className="mb-4">
+            <div className="mb-4 relative w-48 h-48 mx-auto">
               <Image
                 src={previewUrl}
                 alt="Uploaded animal"
-                width={200}
-                height={200}
-                className="mx-auto rounded-lg object-cover"
+                fill
+                style={{ objectFit: 'cover' }}
+                className="rounded-lg"
               />
             </div>
           ) : (
@@ -135,14 +169,45 @@ export default function Home() {
         <div className="text-center">
         <button
           className={`bg-green-500 text-white py-3 px-6 rounded-full ${
-            !selectedFile ? "opacity-50 cursor-not-allowed" : ""
+            !selectedFile || isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
           }`}
           onClick={handleSubmit}
-          disabled={!selectedFile}
+          disabled={!selectedFile || isLoading}
         >
-          <span>Continue</span>
+          {isLoading ? "Processing..." : "Classify Animal"}
         </button>
         </div>
+
+        {/* Error display */}
+        {error && (
+          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
+            <p className="font-bold">Error:</p>
+            <p>{error}</p>
+          </div>
+        )}
+
+        {/* Results section */}
+        {result && (
+          <div ref={resultRef} className="bg-blue-50 p-6 rounded-xl mt-8">
+            <h2 className="text-2xl font-bold mb-4">Classification Results</h2>
+            {Array.isArray(result.labels) && Array.isArray(result.scores) ? (
+              <ul>
+                {result.labels.map((label: string, index: number) => (
+                  <li key={label} className="mb-2 flex justify-between items-center">
+                    <span className="font-semibold">{label}</span>
+                    <span className="bg-blue-200 px-2 py-1 rounded-full text-sm">
+                      {(result.scores[index] * 100).toFixed(2)}%
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <pre className="bg-gray-100 p-4 rounded overflow-auto">
+                {JSON.stringify(result, null, 2)}
+              </pre>
+            )}
+          </div>
+        )}
       </main>
       <footer className="mt-12 text-center text-gray-600">
         <p>AI and GPT Bootcamp Q3 2024</p>
