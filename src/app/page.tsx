@@ -3,6 +3,7 @@
 import { useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Upload, AlertTriangle } from "lucide-react";
+import axios from "axios";
 
 const animalCategories = ["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"];
 
@@ -13,12 +14,14 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [formattedResult, setFormattedResult] = useState<{ labels: string[], scores: number[] } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
   const handleFileSelection = useCallback((file: File) => {
     setSelectedFile(file);
     setResult(null);
+    setFormattedResult(null);
     setError(null);
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
@@ -46,33 +49,35 @@ export default function Home() {
     formData.append("file", selectedFile);
 
     try {
-      const response = await fetch("/api/classify", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("API response:", data);
-      setResult(data.result);
+      const response = await axios.post("/api/classify", formData);
+      setResult(response.data.result);
     } catch (error) {
       console.error("Error submitting image:", error);
       setError(error instanceof Error ? error.message : String(error));
       setResult(null);
+      setFormattedResult(null);
     } finally {
       setIsLoading(false);
     }
   }, [selectedFile]);
 
   useEffect(() => {
-    console.log("Result updated:", result);
-    if (result && resultRef.current) {
-      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (result) {
+      if (Array.isArray(result) && result.length > 0) {
+        const labels = result.map(item => item.label);
+        const scores = result.map(item => item.score);
+        setFormattedResult({ labels, scores });
+      } else {
+        setFormattedResult(null);
+      }
     }
   }, [result]);
+
+  useEffect(() => {
+    if (formattedResult && resultRef.current) {
+      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [formattedResult]);
 
   useEffect(() => {
     const originalError = console.error;
@@ -121,7 +126,6 @@ export default function Home() {
           <p>This app will give you a description of the animal and tell you if it's dangerous!</p>
         </div>
 
-        {/* Hidden input */}
         <input
           type="file"
           accept="image/*"
@@ -156,10 +160,9 @@ export default function Home() {
             </>
           )}
 
-          {/* Button to select image */}
           <button
             className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto"
-            onClick={() => fileInputRef.current?.click()} // Simulate the click on the input
+            onClick={() => fileInputRef.current?.click()}
           >
           <Upload className="h-5 w-5" />
           <span>Upload Image</span>
@@ -178,7 +181,6 @@ export default function Home() {
         </button>
         </div>
 
-        {/* Error display */}
         {error && (
           <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg">
             <p className="font-bold">Error:</p>
@@ -186,26 +188,37 @@ export default function Home() {
           </div>
         )}
 
-        {/* Results section */}
-        {result && (
+        {formattedResult && (
           <div ref={resultRef} className="bg-blue-50 p-6 rounded-xl mt-8">
             <h2 className="text-2xl font-bold mb-4">Classification Results</h2>
-            {Array.isArray(result.labels) && Array.isArray(result.scores) ? (
-              <ul>
-                {result.labels.map((label: string, index: number) => (
-                  <li key={label} className="mb-2 flex justify-between items-center">
-                    <span className="font-semibold">{label}</span>
-                    <span className="bg-blue-200 px-2 py-1 rounded-full text-sm">
-                      {(result.scores[index] * 100).toFixed(2)}%
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <pre className="bg-gray-100 p-4 rounded overflow-auto">
-                {JSON.stringify(result, null, 2)}
-              </pre>
-            )}
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-blue-200">
+                    <th className="py-2 px-4 border-b">Animal</th>
+                    <th className="py-2 px-4 border-b">Confidence</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {formattedResult.labels.map((label: string, index: number) => (
+                    <tr key={label} className="hover:bg-blue-100">
+                      <td className="py-2 px-4 border-b">{label}</td>
+                      <td className="py-2 px-4 border-b">
+                        <div className="flex items-center">
+                          <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                            <div
+                              className="bg-blue-600 h-2.5 rounded-full"
+                              style={{ width: `${formattedResult.scores[index] * 100}%` }}
+                            ></div>
+                          </div>
+                          <span>{(formattedResult.scores[index] * 100).toFixed(2)}%</span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </main>
