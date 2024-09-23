@@ -52,6 +52,4 @@ Note: The exercise statement is in the [Weekend Project](https://github.com/Enco
 
 <hr>
 
-![image](https://github.com/user-attachments/assets/8fd4e2c9-04b7-416d-b339-f6d13f12f14d)
-
 Please, give a ⭐ if you liked this repo!
