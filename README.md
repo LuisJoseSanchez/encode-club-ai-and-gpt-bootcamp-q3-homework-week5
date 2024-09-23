@@ -50,6 +50,17 @@ To consolidate the knowledge acquired this week, students should complete the fo
 
 Note: The exercise statement is in the [Weekend Project](https://github.com/Encode-Club-AI-Bootcamp/Generative-AI-Applications/tree/main/Lesson-08#weekend-project) section, at the end of **Lesson 20**.
 
+## Demo
+
+Here is an example of the application in action:
+
+1. Upload Image
+<img src="images/Screenshot-w5-app-2024-09-23-01.png" width="35%">
+2. Click "Classify Animal" Button
+<img src="images/Screenshot-w5-app-2024-09-23-02.png" width="35%">
+3. Evaluate the classification results
+<img src="images/Screenshot-w5-app-2024-09-23-03.png" width="35%">
+
 <hr>
 
 Please, give a ⭐ if you liked this repo!
