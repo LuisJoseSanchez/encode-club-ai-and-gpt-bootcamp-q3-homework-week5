@@ -5,7 +5,18 @@ import Image from "next/image";
 import { Upload, AlertTriangle } from "lucide-react";
 import axios from "axios";
 
-const animalCategories = ["Chameleon", "Owl", "Tiger", "Zebra", "Bear", "Squirrel", "Rabbit", "Fox", "Canary", "Wolf"];
+const animalCategories = [
+  "Chameleon",
+  "Owl",
+  "Tiger",
+  "Zebra",
+  "Bear",
+  "Squirrel",
+  "Rabbit",
+  "Fox",
+  "Canary",
+  "Wolf",
+];
 
 export default function Home() {
   const [isDragging, setIsDragging] = useState(false);
@@ -14,7 +25,10 @@ export default function Home() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [formattedResult, setFormattedResult] = useState<{ labels: string[], scores: number[] } | null>(null);
+  const [formattedResult, setFormattedResult] = useState<{
+    labels: string[];
+    scores: number[];
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -26,19 +40,25 @@ export default function Home() {
     setPreviewUrl(URL.createObjectURL(file));
   }, []);
 
-  const handleFileUpload = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      handleFileSelection(event.target.files[0]);
-    }
-  }, [handleFileSelection]);
+  const handleFileUpload = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.files && event.target.files.length > 0) {
+        handleFileSelection(event.target.files[0]);
+      }
+    },
+    [handleFileSelection],
+  );
 
-  const handleDrop = useCallback((event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    setIsDragging(false);
-    if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
-      handleFileSelection(event.dataTransfer.files[0]);
-    }
-  }, [handleFileSelection]);
+  const handleDrop = useCallback(
+    (event: React.DragEvent<HTMLDivElement>) => {
+      event.preventDefault();
+      setIsDragging(false);
+      if (event.dataTransfer.files && event.dataTransfer.files.length > 0) {
+        handleFileSelection(event.dataTransfer.files[0]);
+      }
+    },
+    [handleFileSelection],
+  );
 
   const handleSubmit = useCallback(async () => {
     if (!selectedFile) return;
@@ -52,8 +72,14 @@ export default function Home() {
       const response = await axios.post("/api/classify", formData);
       setResult(response.data.result);
     } catch (error) {
-      console.error("Error submitting image:", error);
-      setError(error instanceof Error ? error.message : String(error));
+      if (axios.isAxiosError(error) && error.response) {
+        const errorMessage =
+          error.response.data.error || "Error submitting image.";
+        setError(errorMessage);
+      } else {
+        console.error("Error submitting image:", error);
+        setError("An unexpected error occurred.");
+      }
       setResult(null);
       setFormattedResult(null);
     } finally {
@@ -64,8 +90,8 @@ export default function Home() {
   useEffect(() => {
     if (result) {
       if (Array.isArray(result) && result.length > 0) {
-        const labels = result.map(item => item.label);
-        const scores = result.map(item => item.score);
+        const labels = result.map((item) => item.label);
+        const scores = result.map((item) => item.score);
         setFormattedResult({ labels, scores });
       } else {
         setFormattedResult(null);
@@ -75,14 +101,17 @@ export default function Home() {
 
   useEffect(() => {
     if (formattedResult && resultRef.current) {
-      resultRef.current.scrollIntoView({ behavior: 'smooth' });
+      resultRef.current.scrollIntoView({ behavior: "smooth" });
     }
   }, [formattedResult]);
 
   useEffect(() => {
     const originalError = console.error;
     console.error = (...args) => {
-      if (typeof args[0] === 'string' && args[0].includes('Extra attributes from the server')) {
+      if (
+        typeof args[0] === "string" &&
+        args[0].includes("Extra attributes from the server")
+      ) {
         return;
       }
       originalError.call(console, ...args);
@@ -112,18 +141,25 @@ export default function Home() {
           </div>
         </div>
         <p className="text-lg text-center text-gray-700">
-          Upload an image of an animal, and our AI will detect and classify it into one of these categories:
+          Upload an image of an animal, and our AI will detect and classify it
+          into one of these categories:
         </p>
         <div className="flex flex-wrap justify-center gap-4">
           {animalCategories.map((animal) => (
-            <span key={animal} className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold">
+            <span
+              key={animal}
+              className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-semibold"
+            >
               {animal}
             </span>
           ))}
         </div>
         <div className="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 rounded-lg flex items-center space-x-3">
           <AlertTriangle className="h-6 w-6 flex-shrink-0" />
-          <p>This app will give you a description of the animal and tell you if it's dangerous!</p>
+          <p>
+            This app will give you a description of the animal and tell you if
+            it's dangerous!
+          </p>
         </div>
 
         <input
@@ -134,9 +170,11 @@ export default function Home() {
           style={{ display: "none" }}
         />
 
-        <div 
+        <div
           className={`border-4 border-dashed rounded-2xl p-8 text-center transition-colors duration-300 ${
-            isDragging ? "border-green-500 bg-green-100" : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
+            isDragging
+              ? "border-green-500 bg-green-100"
+              : "border-gray-300 hover:border-blue-500 hover:bg-blue-50"
           }`}
           onDragEnter={() => setIsDragging(true)}
           onDragLeave={() => setIsDragging(false)}
@@ -149,13 +187,15 @@ export default function Home() {
                 src={previewUrl}
                 alt="Uploaded animal"
                 fill
-                style={{ objectFit: 'cover' }}
+                style={{ objectFit: "cover" }}
                 className="rounded-lg"
               />
             </div>
           ) : (
             <>
-              <p className="text-xl mb-4">Drag and drop your animal image here</p>
+              <p className="text-xl mb-4">
+                Drag and drop your animal image here
+              </p>
               <p className="text-gray-500 mb-4">or</p>
             </>
           )}
@@ -164,21 +204,23 @@ export default function Home() {
             className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-full transition-colors duration-300 flex items-center justify-center space-x-2 mx-auto"
             onClick={() => fileInputRef.current?.click()}
           >
-          <Upload className="h-5 w-5" />
-          <span>Upload Image</span>
+            <Upload className="h-5 w-5" />
+            <span>Upload Image</span>
           </button>
         </div>
 
         <div className="text-center">
-        <button
-          className={`bg-green-500 text-white py-3 px-6 rounded-full ${
-            !selectedFile || isLoading ? "opacity-50 cursor-not-allowed" : "hover:bg-green-600"
-          }`}
-          onClick={handleSubmit}
-          disabled={!selectedFile || isLoading}
-        >
-          {isLoading ? "Processing..." : "Classify Animal"}
-        </button>
+          <button
+            className={`bg-green-500 text-white py-3 px-6 rounded-full ${
+              !selectedFile || isLoading
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-green-600"
+            }`}
+            onClick={handleSubmit}
+            disabled={!selectedFile || isLoading}
+          >
+            {isLoading ? "Processing..." : "Classify Animal"}
+          </button>
         </div>
 
         {error && (
@@ -200,22 +242,29 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody>
-                  {formattedResult.labels.map((label: string, index: number) => (
-                    <tr key={label} className="hover:bg-blue-100">
-                      <td className="py-2 px-4 border-b">{label}</td>
-                      <td className="py-2 px-4 border-b">
-                        <div className="flex items-center">
-                          <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
-                            <div
-                              className="bg-blue-600 h-2.5 rounded-full"
-                              style={{ width: `${formattedResult.scores[index] * 100}%` }}
-                            ></div>
+                  {formattedResult.labels.map(
+                    (label: string, index: number) => (
+                      <tr key={label} className="hover:bg-blue-100">
+                        <td className="py-2 px-4 border-b">{label}</td>
+                        <td className="py-2 px-4 border-b">
+                          <div className="flex items-center">
+                            <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
+                              <div
+                                className="bg-blue-600 h-2.5 rounded-full"
+                                style={{
+                                  width: `${formattedResult.scores[index] * 100}%`,
+                                }}
+                              ></div>
+                            </div>
+                            <span>
+                              {(formattedResult.scores[index] * 100).toFixed(2)}
+                              %
+                            </span>
                           </div>
-                          <span>{(formattedResult.scores[index] * 100).toFixed(2)}%</span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    ),
+                  )}
                 </tbody>
               </table>
             </div>
