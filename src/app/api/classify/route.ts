@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       return NextResponse.json(
         {
           error:
-            "HUGGINGFACE_API_KEY is not set. Please configure your environment.",
+            "HUGGINGFACE_API_KEY is not set. Please configure your environment and reload app.",
         },
         { status: 500 },
       );
